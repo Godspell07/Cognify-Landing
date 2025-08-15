@@ -1,25 +1,62 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import Navbar from './components/Navbar'
 import HeroSection from './sections/HeroSection'
-import DummyHero from './sections/dummyhero'
+import FeatureSection from './sections/FeatureSection'
 import FloatingMenu from './components/FloatingMenu'
 import { AlignJustify, X } from 'lucide-react'
-import { useState } from 'react'
 import { useGSAP } from '@gsap/react'
 import gsap from 'gsap'
 import { SplitText, ScrollTrigger } from 'gsap/all'
-import FeatureSection from './sections/FeatureSection'
+import CTA from './sections/CTA'
 
 gsap.registerPlugin(SplitText, ScrollTrigger)
 
-
 const App = () => {
-
+  const [baseTheme, setBaseTheme] = useState("default") 
+  const [flipped, setFlipped] = useState(false)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+
+
+  // useGSAP(() => {
+  //   const tl = gsap.timeline();
+
+  //   tl.initializeMorphAnimation();
+
+  //   tl.CogsRef.current("#cogs-shape", {
+  //     width: 100,
+  //     scale: 2,
+  //   })
+  // })
+
+  // useGSAP(() => {
+  //   ScrollTrigger.create({
+  //     trigger: '.hero-page',
+  //     start: '90% top',
+  //     end: '+=1',          
+  //     onEnter: () => setFlipped(true),
+  //     onLeaveBack: () => setFlipped(false),
+  //     // markers: true,
+  //   })
+  // }, [])
+
+  
+  useEffect(() => {
+    const root = document.querySelector('.theme-root')
+    const effectiveIsLight = (baseTheme === 'light') !== flipped // boolean XOR
+    
+    // Use requestAnimationFrame to ensure DOM is ready
+    requestAnimationFrame(() => {
+      root.classList.toggle('light', effectiveIsLight)
+      
+
+      gsap.delayedCall(0.1, () => {
+        ScrollTrigger.refresh()
+      })
+    })
+  }, [baseTheme, flipped])
 
   const handleMenuClick = () => {
     setIsMenuOpen(!isMenuOpen)
-
     gsap.to('.menu', {
       width: '300px',
       height: '500px',
@@ -29,37 +66,33 @@ const App = () => {
     })
   }
 
+
   const toggleLight = () => {
-    document.querySelector('.theme-root').classList.toggle('light');
+    setBaseTheme(prev => (prev === 'light' ? 'default' : 'light'))
   }
 
   return (
-    <main className='theme-root bg-white text-black light:bg-black light:text-white select-none'>
+    <main className="theme-root min-h-screen select-none bg-[var(--bg)] text-[var(--fg)]" style={{ transition: 'background-color 0.5s ease, color 0.5s ease',}}>
       <Navbar />
       <HeroSection />
-      {/* <DummyHero /> */}
       <FeatureSection />
+      
       {/* FloatingMenu */}
       <div className="flex z-50 items-center justify-between">
-        <div className=" fixed bottom-6 left-3 ">
-          <button 
-            className='theme-root bg-black p-2 rounded-full light:bg-white'
-            onClick= {toggleLight}
-          >
-          </button>
+        <div className="fixed bottom-6 left-3">
+          <button
+            className="p-2 rounded-full border border-[var(--fg)] bg-[var(--fg)] text-[var(--bg)]"
+            onClick={toggleLight}
+            aria-label="Toggle theme"
+          />
         </div>
-
-        <div className='menu bottom-6 right-3'>
-          <button 
-            className="p-2 bottom-6 right-3 fixed"
-            onClick={() => {
-              handleMenuClick(); 
-            }} 
+        <div className="menu">
+          <button
+            className="p-2 fixed bottom-6 right-3"
+            onClick={handleMenuClick}
+            aria-label="Open menu"
           >
-            {isMenuOpen ? 
-              (<X className='w-6 h-6' />) 
-              : 
-              (<AlignJustify className='w-6 h-6' />)}
+            {isMenuOpen ? (<X className="w-6 h-6" />) : (<AlignJustify className="w-6 h-6" />)}
           </button>
         </div>
       </div>

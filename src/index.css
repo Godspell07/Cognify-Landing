@@ -33,16 +33,33 @@
   color-scheme: #faefca #f88363;
 } */
 
+#ball-shape,
+#hero-box,
+[id*="ball-shape"] {
+  transition: none !important;
+}
+
+.theme-root {
+  --bg: #f3ddc2;   /* light bg */
+  --fg: #618A7F;   /* light text */
+}
+
+.theme-root.light {
+  --bg: #618A7F;   /* dark bg */
+  --fg: #f3ddc2;   /* dark text */
+}
+
 @theme {
   --color-black: #618A7F;  
   --color-main-bg: #232224;
   --color-white: #f3ddc2;
+  --color-orange: #f88363;
+  --color-milkly: #FAF4EB;
   --color-dark-brown: #523122;
   --color-mid-brown: #a26833;
   --color-light-brown: #e3a458;
   --color-red-brown: #7f3b2d;
   --color-yellow-brown: #a26833;
-  --color-milk-yellow: #e3d3bc;
   --color-red: #a02128;
   --color-milk: #faeade;
   --font-sans: "Antonio", sans-serif;

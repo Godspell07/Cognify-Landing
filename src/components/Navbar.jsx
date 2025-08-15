@@ -23,7 +23,7 @@ const Navbar = () => {
   }
 
   return (
-    <nav className='fixed top-0 left-0 z-50 h-16 w-full border-none text-black light:text-white'>
+    <nav id='nav' className='fixed top-0 left-0 z-50 h-16 w-full border-none text-[var(--fg)]'>
       <div className='flex items-center justify-between'>
         <div href='/' className='flex items-center font-[Antonio] font-bold cursor-pointer md:text-4xl text-2xl px-4 py-3'>
           <a href="/">Cognify.</a>

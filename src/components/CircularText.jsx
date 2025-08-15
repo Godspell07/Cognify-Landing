@@ -24,6 +24,7 @@ const CircularText = ({
   spinDuration = 20,
   onHover = "speedUp",
   className = "",
+  children,
 }) => {
   const letters = Array.from(text);
   const controls = useAnimation();
@@ -92,6 +93,11 @@ const CircularText = ({
       onMouseEnter={handleHoverStart}
       onMouseLeave={handleHoverEnd}
     >
+      {children && (
+        <div className="absolute inset-0 flex items-center justify-center z-10">
+          {children}
+        </div>
+      )}
       {letters.map((letter, i) => {
         const rotationDeg = (360 / letters.length) * i;
         const factor = Math.PI / letters.length;
