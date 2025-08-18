@@ -17,27 +17,6 @@ const App = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
 
 
-  // useGSAP(() => {
-  //   const tl = gsap.timeline();
-
-  //   tl.initializeMorphAnimation();
-
-  //   tl.CogsRef.current("#cogs-shape", {
-  //     width: 100,
-  //     scale: 2,
-  //   })
-  // })
-
-  // useGSAP(() => {
-  //   ScrollTrigger.create({
-  //     trigger: '.hero-page',
-  //     start: '90% top',
-  //     end: '+=1',          
-  //     onEnter: () => setFlipped(true),
-  //     onLeaveBack: () => setFlipped(false),
-  //     // markers: true,
-  //   })
-  // }, [])
 
   
   useEffect(() => {
@@ -76,6 +55,7 @@ const App = () => {
       <Navbar />
       <HeroSection />
       <FeatureSection />
+      {/* <CTA /> */}
       
       {/* FloatingMenu */}
       <div className="flex z-50 items-center justify-between">

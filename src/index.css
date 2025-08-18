@@ -39,6 +39,21 @@
   transition: none !important;
 }
 
+
+.feature-section::-webkit-scrollbar {
+  display: none;
+}
+
+
+.feature-section{
+  margin: 0;
+  overflow-y: hidden;
+  overflow-x: auto;
+  white-space: nowrap;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE 10+ */
+}
+
 .theme-root {
   --bg: #f3ddc2;   /* light bg */
   --fg: #618A7F;   /* light text */

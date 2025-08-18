@@ -5,67 +5,75 @@ import CircularText from '../components/CircularText'
 import CurvedLoop from '../components/Loop'
 import { useEffect, useRef } from 'react'
 
-
-
 gsap.registerPlugin(ScrollTrigger, SplitText, MorphSVGPlugin)
+
 const HeroSection = () => {
+  const ballRef = useRef(null);
+  const cogRef = useRef(null);
+  const heroBoxRef = useRef(null);
+  const circularTextRef = useRef(null);
+  const morphedHomeRef = useRef(null);  // where #morphed lives in the hero initially
 
+  const moveCogToPortal = () => {
+    const cog = document.getElementById('morphed');
+    const portal = document.getElementById('morphed-portal');
+    if (cog && portal && !portal.contains(cog)) {
+      portal.appendChild(cog);
+      // truly viewport-fixed & top-center
+      gsap.set(cog, {
+        position: 'fixed',
+        top: '10px',
+        left: '50%',
+        xPercent: -50,
+        y: 0,
+        zIndex: 60,
+      });
+    }
+  };
 
-  // Add this function to initialize the morphing animation
+  const returnCogHome = () => {
+    const cog = document.getElementById('morphed');
+    const home = morphedHomeRef.current;
+    if (cog && home && !home.contains(cog)) {
+      home.appendChild(cog);
+      // restore to hero's absolute center
+      gsap.set(cog, {
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        xPercent: -50,
+        yPercent: -50,
+        y: 0,
+        zIndex: 40,
+      });
+    }
+  };
+
   const initializeMorphAnimation = () => {
-    MorphSVGPlugin.convertToPath("#ball-shape");
-    gsap.set('#ball-shape', { transformBox: 'fill-box', transformOrigin: '50% 50%' }); 
-    gsap.to('#ball-shape', {
+    MorphSVGPlugin.convertToPath(ballRef.current);
+    gsap.set(ballRef.current, { transformBox: 'fill-box', transformOrigin: '50% 50%' }); 
+    gsap.to(ballRef.current, {
       scrollTrigger: {
-        trigger: '#hero-box',
+        trigger: heroBoxRef.current,
         start: 'top center',
         end: '+=280',
         scrub: true,
-        //markers: true,
       },
-      morphSVG: {
-        shape: '#cogPath',
-        // shapeIndex: 0, // optional if you want to control matching; plugin does a decent job
-      },
-      duration: 1.2, // scrub controls actual pacing, duration still fine as baseline
+      morphSVG: { shape: cogRef.current },
+      duration: 1.2,
       ease: 'power2.inOut',
     });
   };
 
-  useGSAP(() =>{
+  useGSAP(() => {
     const heroSplit = new SplitText(".title", {type: 'chars,words'})
     const paraSplit = new SplitText('.para', {type: 'lines'})
 
     heroSplit.chars.forEach((char) => char.classList.add('z-20'))
 
-    gsap.from(heroSplit.chars, {
-      yPercent: 150,
-      duration: 1.8,
-      ease: 'expo.out',
-    })
-
-    gsap.from('.border-animation', {
-      borderBottomWidth: 0,
-      duration: 0.5,
-      delay: 0.4,
-      ease: 'power1.out',
-    })
-
-    gsap.from('.hero-button', {
-      opacity: 0,
-      duration: 1,
-      ease: 'power1.inOut'
-    })
-
-    // gsap.from('#sub-head', {
-    //   marginLeft: '0%',
-    //   opacity: 0,
-    //   delay: 1,
-    //   duration: 1,
-    //   ease: 'power1.inOut',
-
-    // })
-
+    gsap.from(heroSplit.chars, { yPercent: 150, duration: 1.8, ease: 'expo.out' })
+    gsap.from('.border-animation', { borderBottomWidth: 0, duration: 0.5, delay: 0.4, ease: 'power1.out' })
+    gsap.from('.hero-button', { opacity: 0, duration: 1, ease: 'power1.inOut' })
 
     gsap.from(paraSplit.lines, {
       yPercent: 100,
@@ -76,30 +84,67 @@ const HeroSection = () => {
       delay: 0.5,
     })
 
-    gsap.to('#hero-box', {
+    // secondary morph while scrolling down the page
+    gsap.to(ballRef.current, {
       scrollTrigger: {
-        trigger: '#hero-box',
-        start: 'center top',
-        end: '+=280',
+        trigger: '#border-animation',
+        start: "top 20% ",
+        endTrigger: ".feature-section",
+        end: "top top",
         scrub: true,
-        markers: true,
+        pin: false,
       },
-      y: 280,
+      morphSVG: { shape: cogRef.current },
       duration: 1.2,
-      ease: 'linear',
-    })
-    const tl = gsap.timeline();
-    initializeMorphAnimation();
+      ease: 'power2.inOut',
+    });
 
-    // tl.addLabel('scale')
-    //   .to('#cogPath', {
-    //     scaleX: 3,
-    //     scaleY: 2.5,
-    //     duration: 3,
-    //     ease: 'power1.inOut'
-    //   })
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: heroBoxRef.current,
+        start: "center top",
+        endTrigger: ".feature-section",
+        end: "top top",
+        scrub: true,
+        pin: false,
+      }
+    });
 
-  },[]);
+    MorphSVGPlugin.convertToPath(ballRef.current);
+    gsap.set(ballRef.current, { transformBox: 'fill-box', transformOrigin: '50% 50%' });
+
+    // Move hero content a bit, but DO NOT push the cog up with a 'y' on #morphed
+    tl.to(heroBoxRef.current, { y: 150, duration: 3, ease: 'linear' }, 0)
+
+    // scale the cog only (no y!)
+    tl.to('#morphed', {
+      scale: 8,
+      y: -300,
+      transformOrigin: "50% 50%",
+      duration: 3,
+      ease: "power2.inOut"
+    }, 1);
+
+    // fade out circular text
+    tl.to(circularTextRef.current, {
+      opacity: 0,
+      duration: 2,
+      ease: "power1.inOut"
+    }, 1);
+
+    // 🧠 The crucial handoff:
+    // When FeatureSection hits top, portal the cog out of transformed ancestors,
+    // so it stays truly at the top, independent of pin/transform.
+    ScrollTrigger.create({
+      trigger: ".feature-section",
+      start: "top top",
+      onEnter: moveCogToPortal,
+      onEnterBack: moveCogToPortal,
+      onLeaveBack: returnCogHome,   // scrolling back up past feature -> put it back
+      // (optional) onLeave: returnCogHome if you want it to rejoin after feature ends
+    });
+
+  }, []);
 
   useEffect(() => {
     const observer = new MutationObserver((mutations) => {
@@ -128,9 +173,9 @@ const HeroSection = () => {
     <div className="absolute">
       <svg viewBox="0 0 435 425" width="120" height="120" style={{ color: 'var(--fg)', display:'absolute'}}>
         <defs>
-          <path id="cogPath" d={cogD} />
+          <path ref={cogRef} id="cogPath" d={cogD} />
         </defs>
-        <path id="ball-shape" d={circleD} fill='var(--fg)' />
+        <path ref={ballRef} id="ball-shape" d={circleD} fill='var(--fg)' />
       </svg>
     </div>
       
@@ -168,14 +213,22 @@ const HeroSection = () => {
         <div className="para relative col-span-1 row-span-1 md:col-span-3 md:row-span-2 w-full lg:w-full p-4 md:p-0">
           <p>Cogify is your AI-powered launchpad for visual thinking — combining curated references, generated concepts, and color palettes into one clean, editable board. You imagine it. We spark it. You run with it.</p>
         </div>
-        <div id='hero-box' className="hero-button z-40 relative col-span-1 row-span-1 row-start-2 md:col-span-2 md:row-span-2 w-full md:col-start-4 items-center rounded-full">
-            <CircularText
-              text="The*Push*You*Need*"
-              onHover="speedUp"
-              spinDuration={20}
-            >
-              <MorphIcon />
-            </CircularText>
+        <div id='hero-box' ref={heroBoxRef} className="hero-button z-40 relative col-span-1 row-span-1 row-start-2 md:col-span-2 md:row-span-2 w-full md:col-start-4 items-center rounded-full">
+          <div className="relative w-[200px] h-[200px] mx-auto">
+            <div ref={circularTextRef}>
+              <CircularText
+                text="The*Push*You*Need*"
+                onHover="speedUp"
+                spinDuration={20}
+              />
+            </div>
+            
+            <div id="morphed-home" ref={morphedHomeRef}>
+              <div id="morphed" className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                <MorphIcon id='morph-icon' ref={{ ballRef, cogRef }} />
+              </div>
+            </div>
+          </div>
         </div>
         <div className="para col-span-1 row-span-1 row-start-3 md:col-span-3 md:row-span-2 md:col-start-6 w-full p-4 md:p-0">
           <p>
