@@ -1,118 +1,111 @@
-import React, { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState } from "react";
 import { AlignJustify, X } from "lucide-react";
 import gsap from "gsap";
 
-const FloatingMenu = ({ toggleLight }) => {
-  // 1. state to show X or menu icon (you can change when to flip it)
-  const [isOpen, setIsOpen] = useState(false);
+const sections = [
+  { id: "hero", label: "Hero" },
+  { id: "features", label: "Features" },
+  { id: "cta", label: "Contact" },
+  { id: "footer", label: "Footer" },
+];
 
-  // 2. refs: one for the menu container, one array for each link
+const FloatingMenu = () => {
   const menuRef = useRef(null);
-  const linksRef = useRef([]); // linksRef.current = [el0, el1, el2...]
+  const [open, setOpen] = useState(false);
+  const [current, setCurrent] = useState("Hero");
 
-  // 3. timeline reference so we can play() and reverse()
-  const tl = useRef(null);
-
-  // Build the timeline once on mount
+  /* Animate pill width */
   useEffect(() => {
-    // init timeline, paused so it doesn't run immediately
-    tl.current = gsap.timeline({ paused: true, defaults: { ease: "power3.out" } });
+    if (!menuRef.current) return;
 
-    // 3.a expand the menu container (from small circle -> panel)
-    tl.current.to(menuRef.current, {
-      width: "320px",
-      height: "100vh",         // full viewport height
-      borderRadius: "0px",     // make square/rect
-      duration: 0.45
+    gsap.to(menuRef.current, {
+      width: open ? 300 : 140,
+      duration: 0.4,
+      ease: "power3.out",
     });
+  }, [open]);
 
-    // 3.b stagger in the link buttons (they come up a little and fade in)
-    tl.current.from(
-      linksRef.current,
-      {
-        y: 24,
-        opacity: 0,
-        stagger: 0.07,
-        duration: 0.35
+  /* Observe sections */
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const match = sections.find(s => s.id === entry.target.id);
+            if (match) setCurrent(match.label);
+          }
+        });
       },
-      "-=0.28" // overlap links animation with the end of the expand animation
+      {
+        threshold: 0.3,
+        rootMargin: "0px 0px -30% 0px",
+      }
     );
 
-    // CLEANUP on unmount
-    return () => tl.current?.kill();
+    sections.forEach(({ id }) => {
+      const el = document.getElementById(id);
+      if (el) observer.observe(el);
+    });
+
+    return () => observer.disconnect();
   }, []);
-
-  // helper to attach refs for each link in a map
-  const setLinkRef = (el, i) => {
-    linksRef.current[i] = el;
-  };
-
-  // Toggle function: play or reverse timeline, flip isOpen
-  const toggleMenu = () => {
-    if (!tl.current) return;
-    if (!isOpen) tl.current.play();    // open
-    else tl.current.reverse();         // close (reverse uses exact reverse of timeline)
-    setIsOpen(!isOpen);
-  };
-
-  // Simple menu labels — you can add icons, routes, etc.
-  const menuLabels = ["HOME", "ABOUT", "WORK", "SERVICES", "CONTACT"];
 
   return (
     <div
       ref={menuRef}
-      // initial small circle styles (Tailwind). overflow-hidden hides menu items until expand.
-      className={`menu fixed bottom-6 right-6 w-12 h-12 bg-black text-white rounded-full overflow-hidden shadow-xl z-50`}
-      style={{ willChange: "width, height, borderRadius" }} // hint for performance
+      className="
+        fixed bottom-6 right-6 z-50
+        h-12
+        bg-[var(--fg)] text-[var(--bg)]
+        rounded-full shadow-lg
+        overflow-hidden
+        flex items-center
+      "
     >
-      {/* ====== the menu contents (hidden until the container grows) ====== */}
-      <div className="px-6 pt-8">
-        <nav className="flex flex-col gap-4">
-          {menuLabels.map((label, i) => (
-            <button
-              key={label}
-              ref={(el) => setLinkRef(el, i)}
-              className="menu-item text-left text-lg font-semibold opacity-100 bg-transparent"
-              onClick={() => {
-                // example action — replace with your routing/navigation
-                console.log("clicked", label);
-                // optionally close menu after click:
-                // tl.current.reverse(); setIsOpen(false)
-              }}
-            >
-              {label}
-            </button>
-          ))}
+      {/* LEFT: current section */}
+      <div className={`
+          pl-4 pr-12 text-xs font-medium whitespace-nowrap select-none
+          transition-opacity duration-200
+          ${open ? "opacity-0 pointer-events-none" : "opacity-100"}
+        `}
+      >
+        {current}
+      </div>
 
-          {/* Theme toggle as a link (last item) */}
-          <button
-            ref={(el) => setLinkRef(el, menuLabels.length)}
-            className="menu-item text-left text-lg font-semibold bg-transparent"
-            onClick={() => {
-              toggleLight?.();
-            }}
-          >
-            Toggle Theme
-          </button>
+      {/* RIGHT: toggle button */}
+      <button
+        onClick={() => setOpen(!open)}
+        aria-label="Toggle menu"
+        className="
+          absolute right-0 top-0
+          w-12 h-12
+          flex items-center justify-center
+        "
+      >
+        {open ? <X /> : <AlignJustify />}
+      </button>
+
+      {/* EXPANDED NAV */}
+      {open && (
+        <nav className="absolute left-0 flex items-center gap-6 pl-4 pr-14 text-sm font-semibold">
+          {sections.slice(0, 3).map(({ id, label }) => {
+            const isActive = current === label;
+            return (
+              <a
+                key={id}
+                href={`#${id}`}
+                onClick={() => setOpen(false)}
+                className={`
+                  transition
+                  ${isActive ? "font-semibold underline" : "opacity-70 hover:opacity-100"}
+                `}
+              >
+                {label}
+              </a>
+            );
+          })}
         </nav>
-      </div>
-
-      {/* bottom social/icons area (optional) */}
-      <div className="absolute bottom-6 left-6 flex gap-3">
-        <div className="social opacity-100">🐦</div>
-        <div className="social opacity-100">📸</div>
-      </div>
-
-      {/* Floating control button (stays bottom-right inside the menu container) */}
-      <div className="absolute bottom-3 right-3">
-        <button
-          onClick={toggleMenu}
-          className="p-2 rounded-md bg-white text-black shadow-md"
-          aria-label="Toggle menu"
-        >
-          {isOpen ? <X className="w-5 h-5" /> : <AlignJustify className="w-5 h-5" />}
-        </button>
-      </div>
+      )}
     </div>
   );
 };
