@@ -5,6 +5,7 @@ import CircularText from '../components/CircularText'
 import CurvedLoop from '../components/Loop'
 import { useEffect, useRef } from 'react'
 
+
 gsap.registerPlugin(ScrollTrigger, SplitText, MorphSVGPlugin)
 
 const HeroSection = () => {
@@ -132,7 +133,6 @@ const HeroSection = () => {
       ease: "power1.inOut"
     }, 1);
 
-    // 🧠 The crucial handoff:
     // When FeatureSection hits top, portal the cog out of transformed ancestors,
     // so it stays truly at the top, independent of pin/transform.
     ScrollTrigger.create({
@@ -141,7 +141,7 @@ const HeroSection = () => {
       onEnter: moveCogToPortal,
       onEnterBack: moveCogToPortal,
       onLeaveBack: returnCogHome,   // scrolling back up past feature -> put it back
-      // (optional) onLeave: returnCogHome if you want it to rejoin after feature ends
+      // onLeave: returnCogHome if you want it to rejoin after feature ends
     });
 
   }, []);
@@ -183,7 +183,7 @@ const HeroSection = () => {
 
 
   return (
-    <div className='hero-page h-screen w-screen'>
+    <div id='hero' className='hero-page h-screen w-screen'>
       <div id='border-animation' className="border-animation flex flex-col pt-24 md:pt-[8%] md:mx-[8%] pb-5 top-[15%] left-[10%] text-[var(--fg)] border-b-[2px] border-b-[var(--fg)]">
         <h1 className="text-4xl md:text-8xl font-bold pl-12 title">The First Brushstroke</h1>
         <h1 className="border-animation text-4xl md:text-7xl font-bold px-12 md:ml-[62%] title">
