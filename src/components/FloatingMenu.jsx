@@ -31,7 +31,7 @@ const FloatingMenu = () => {
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            const match = sections.find(s => s.id === entry.target.id);
+            const match = sections.find((s) => s.id === entry.target.id);
             if (match) setCurrent(match.label);
           }
         });
@@ -63,7 +63,8 @@ const FloatingMenu = () => {
       "
     >
       {/* LEFT: current section */}
-      <div className={`
+      <div
+        className={`
           pl-4 pr-12 text-xs font-medium whitespace-nowrap select-none
           transition-opacity duration-200
           ${open ? "opacity-0 pointer-events-none" : "opacity-100"}
@@ -79,7 +80,7 @@ const FloatingMenu = () => {
         className="
           absolute right-0 top-0
           w-12 h-12
-          flex items-center justify-center
+          flex items-center justify-center cursor-pointer hover:opacity-80 transition
         "
       >
         {open ? <X /> : <AlignJustify />}
@@ -96,8 +97,13 @@ const FloatingMenu = () => {
                 href={`#${id}`}
                 onClick={() => setOpen(false)}
                 className={`
+                  cursor-pointer
                   transition
-                  ${isActive ? "font-semibold underline" : "opacity-70 hover:opacity-100"}
+                  ${
+                    isActive
+                      ? "font-semibold underline"
+                      : "opacity-70 hover:opacity-100"
+                  }
                 `}
               >
                 {label}

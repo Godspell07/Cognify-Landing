@@ -5,7 +5,11 @@ import React, { useMemo, useEffect } from "react";
 import * as THREE from "three";
 import { useGLTF, useTexture } from "@react-three/drei";
 
-export function PCModel({ modelPath = "/models/pc.glb", screenStatus = "idle", ...props }) {
+export function PCModel({
+  modelPath = "/models/pc.glb",
+  screenStatus = "idle",
+  ...props
+}) {
   const { nodes, materials } = useGLTF(modelPath);
 
   // load textures
@@ -30,7 +34,12 @@ export function PCModel({ modelPath = "/models/pc.glb", screenStatus = "idle", .
 
     if (!mat) {
       // debug: material not found
-      console.warn("[PCModel] material", matName, "not found. materials:", Object.keys(materials || {}));
+      console.warn(
+        "[PCModel] material",
+        matName,
+        "not found. materials:",
+        Object.keys(materials || {})
+      );
       return;
     }
 
@@ -47,30 +56,61 @@ export function PCModel({ modelPath = "/models/pc.glb", screenStatus = "idle", .
     // assign map + emissive to make it glow like a screen
     mat.map = null;
     mat.emissiveMap = screenTexture;
-    mat.emissive = new THREE.Color(1,1,1);
-    mat.emissiveIntensity = 0.1;
+    mat.emissive = new THREE.Color(1, 1, 1);
+    mat.emissiveIntensity = 0.8;
     mat.needsUpdate = true;
 
     // cleanup not necessary; we intentionally mutate the material for performance
-
   }, [screenTexture, materials]);
 
   return (
     <group {...props} dispose={null}>
       <group position={[-0.001, -0.013, 0.002]}>
-        <mesh geometry={nodes.mousepad.geometry} material={materials.M_lam_teal} />
-        <mesh geometry={nodes.keyboard_1.geometry} material={materials.M_lam_browngreylighter} />
-        <mesh geometry={nodes.keyboard_2.geometry} material={materials.M_plastic_bone} />
-        <mesh geometry={nodes.keyboard_keys.geometry} material={materials.M_lam_browngreylighter} />
-        <mesh geometry={nodes.monitor_and_body_1.geometry} material={materials.M_plastic_bone} />
-        <mesh geometry={nodes.monitor_and_body_2.geometry} material={materials.M_lam_darkgrey} />
-        <mesh geometry={nodes.monitor_and_body_3.geometry} material={materials.M_plastic_bone_shad} />
+        <mesh
+          geometry={nodes.mousepad.geometry}
+          material={materials.M_lam_teal}
+        />
+        <mesh
+          geometry={nodes.keyboard_1.geometry}
+          material={materials.M_lam_browngreylighter}
+        />
+        <mesh
+          geometry={nodes.keyboard_2.geometry}
+          material={materials.M_plastic_bone}
+        />
+        <mesh
+          geometry={nodes.keyboard_keys.geometry}
+          material={materials.M_lam_browngreylighter}
+        />
+        <mesh
+          geometry={nodes.monitor_and_body_1.geometry}
+          material={materials.M_plastic_bone}
+        />
+        <mesh
+          geometry={nodes.monitor_and_body_2.geometry}
+          material={materials.M_lam_darkgrey}
+        />
+        <mesh
+          geometry={nodes.monitor_and_body_3.geometry}
+          material={materials.M_plastic_bone_shad}
+        />
 
         {/* IMPORTANT: keep the original mesh with its material; we mutated materials.M_screen_blue above */}
-        <mesh geometry={nodes.monitor_and_body_4.geometry} material={materials.M_screen_blue} castShadow receiveShadow />
+        <mesh
+          geometry={nodes.monitor_and_body_4.geometry}
+          material={materials.M_screen_blue}
+          castShadow
+          receiveShadow
+        />
 
-        <mesh geometry={nodes.mouse_1.geometry} material={materials.M_plastic_bone} />
-        <mesh geometry={nodes.mouse_2.geometry} material={materials.M_lam_browngrey} />
+        <mesh
+          geometry={nodes.mouse_1.geometry}
+          material={materials.M_plastic_bone}
+        />
+        <mesh
+          geometry={nodes.mouse_2.geometry}
+          material={materials.M_lam_browngrey}
+        />
       </group>
     </group>
   );
